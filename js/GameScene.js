@@ -6,37 +6,37 @@ class GameScene extends Phaser.Scene{
         });
     }
 	preload(){
-		this.load.image('brick', 'assets/brick.png');
-		this.load.image('paddle', 'assets/paddle1.png');
-		this.load.image('ball', 'assets/ball1.png');
-		console.log(paper);
+		this.load.image('brick', 'assets/brick2.png');
+		this.load.image('paddle', 'assets/paddle2.png');
+		this.load.image('ball', 'assets/ball2.png');
 	}
 
 
     changeBackgroundColor(){
-
+        var random = Math.floor(Math.random() * 12) + 0 
+        this.camera.setBackgroundColor(this.colors[random]);
 
     }
 
 	create(){
-
         this.camera = this.cameras.main;
         //this.camera1 = this.cameras.add(0, 0, 800, 600);
         this.camera.setBackgroundColor("#48639C");
-
         this.physics.world.setBoundsCollision(true, true, true, false);
         this.createBricks();
         this.createPaddle();
         this.createBall();
 
-        this.physics.add.collider(this.ball, this.bricksGroup, this.hitBrick, null, this);
-        this.physics.add.collider(this.ball, this.paddle, this.hitPaddle, null, this);
+        this.colors = ['#51A3A3', '#F49CBB', '#DD2D4A', '#880D1E',
+                        '#CB904D','#9B7EDE','#BCD2EE','#832161',
+                        '#C3B299','#DBEBC0','#97DB4F', '#79C99E'];
 	}
 
 	update(){
         if(this.bricksGroup.countActive() === 0){
             this.ball.disableBody(true, true);
             this.resetLevel();
+            alert("You win!");
         }
         if(this.ball.y > 600){
             this.resetLevel();
@@ -46,14 +46,15 @@ class GameScene extends Phaser.Scene{
 	}
 
     /**
-     * Creates the paddle and handles its movement, pointermove is the mouse movement and pointerup is mouse click
+     * Creates the paddle and handles its movement, 
+     * pointermove is the mouse movement and pointerup is mouse click
      */
     createPaddle() {
         this.paddle = this.physics.add.image(400, 550, 'paddle').setImmovable();
 
         this.input.on('pointermove', function (pointer) {
 
-            //Keep the paddle within the game
+            //Keeps the paddle within the game
             this.paddle.x = Phaser.Math.Clamp(pointer.x, 52, 748);
 
             if (this.ball.getData('onPaddle'))
@@ -94,9 +95,15 @@ class GameScene extends Phaser.Scene{
         }
     }
 
+    /**
+     * Creates the ball, assigns its image and adds the colliders fot the paddle and bricks.
+     **/
     createBall() {
         this.ball = this.physics.add.image(this.paddle.x, 500, 'ball').setCollideWorldBounds(true).setBounce(1);
         this.ball.setData('onPaddle', true);
+
+        this.physics.add.collider(this.ball, this.bricksGroup, this.hitBrick, null, this);
+        this.physics.add.collider(this.ball, this.paddle, this.hitPaddle, null, this);
 
     }
 
