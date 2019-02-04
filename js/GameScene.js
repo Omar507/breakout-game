@@ -41,8 +41,6 @@ class GameScene extends Phaser.Scene{
         if(this.ball.y > 600){
             this.resetLevel();
         }
-
-
 	}
 
     /**
