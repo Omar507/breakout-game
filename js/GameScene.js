@@ -23,13 +23,22 @@ class GameScene extends Phaser.Scene{
         //this.camera1 = this.cameras.add(0, 0, 800, 600);
         this.camera.setBackgroundColor("#48639C");
         this.physics.world.setBoundsCollision(true, true, true, false);
+
+        //Create Groups
+        this.ballsGroup = this.physics.add.group();
+
+
         this.createBricks();
         this.createPaddle();
         this.createBall();
+        this.handleUserInput();
 
         this.colors = ['#51A3A3', '#F49CBB', '#DD2D4A', '#880D1E',
                         '#CB904D','#9B7EDE','#BCD2EE','#832161',
                         '#C3B299','#DBEBC0','#97DB4F', '#79C99E'];
+
+
+        
 	}
 
 	update(){
@@ -44,34 +53,10 @@ class GameScene extends Phaser.Scene{
 	}
 
     /**
-     * Creates the paddle and handles its movement, 
-     * pointermove is the mouse movement and pointerup is mouse click
+     * Creates the paddle
      */
     createPaddle() {
         this.paddle = this.physics.add.image(400, 550, 'paddle').setImmovable();
-
-        this.input.on('pointermove', function (pointer) {
-
-            //Keeps the paddle within the game
-            this.paddle.x = Phaser.Math.Clamp(pointer.x, 52, 748);
-
-            if (this.ball.getData('onPaddle'))
-            {
-                this.ball.x = this.paddle.x;
-            }
-
-        }, this);
-
-        this.input.on('pointerup', function (pointer) {
-
-            if (this.ball.getData('onPaddle'))
-            {
-                this.ball.setVelocity(0, -300);
-                this.ball.setData('onPaddle', false);
-            }
-
-        }, this);
-
     }
 
     createBricks(){
@@ -93,15 +78,65 @@ class GameScene extends Phaser.Scene{
         }
     }
 
+    handleUserInput(){
+        //Handles the movement of the mouse
+        this.input.on('pointermove', function (pointer) {
+
+            //Keeps the paddle within the game
+            this.paddle.x = Phaser.Math.Clamp(pointer.x, 52, 748);
+
+            if (this.ball.getData('onPaddle'))
+            {
+                this.ball.x = this.paddle.x;
+            }
+
+        }, this);
+
+        //Handles mouse click to start game
+        this.input.on('pointerup', function (pointer) {
+
+            if (this.ball.getData('onPaddle'))
+            {
+                this.ball.setVelocity(0, -400);
+                this.ball.setData('onPaddle', false);
+            }
+
+        }, this);
+
+        this.input.keyboard.on('keydown_A', (event) => { this.powerupPlusTwoBalls() });
+
+    }
+
+
+
     /**
      * Creates the ball, assigns its image and adds the colliders fot the paddle and bricks.
      **/
     createBall() {
-        this.ball = this.physics.add.image(this.paddle.x, 500, 'ball').setCollideWorldBounds(true).setBounce(1);
+
+        this.ball = this.ballsGroup.create(this.paddle.x, 500, 'ball').setCollideWorldBounds(true).setBounce(1);
+        //this.ball = this.physics.add.image(this.paddle.x, 500, 'ball').setCollideWorldBounds(true).setBounce(1);
         this.ball.setData('onPaddle', true);
 
         this.physics.add.collider(this.ball, this.bricksGroup, this.hitBrick, null, this);
         this.physics.add.collider(this.ball, this.paddle, this.hitPaddle, null, this);
+    }
+
+    powerupPlusTwoBalls() {
+        
+        this.newBall = this.ballsGroup.create(this.ball.x, this.ball.y, 'ball').setCollideWorldBounds(true).setBounce(1);
+        this.physics.add.collider(this.newBall, this.bricksGroup, this.hitBrick, null, this);
+        this.physics.add.collider(this.newBall, this.paddle, this.hitPaddle, null, this);
+
+        this.newBall2 = this.ballsGroup.create(this.ball.x, this.ball.y, 'ball').setCollideWorldBounds(true).setBounce(1);
+        this.physics.add.collider(this.newBall2, this.bricksGroup, this.hitBrick, null, this);
+        this.physics.add.collider(this.newBall2, this.paddle, this.hitPaddle, null, this);
+        
+
+
+        this.newBall.setVelocity(400, -400);
+        this.newBall2.setVelocity(-400, -400);
+
 
     }
 
